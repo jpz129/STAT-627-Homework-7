@@ -1,0 +1,149 @@
+---
+title: "Homework 7"
+author: "JP Zamanillo"
+date: "11/10/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3.
+
+```{r}
+# loading package for data
+library(ISLR)
+
+# loading data and setting to path
+data("OJ")
+attach(OJ)
+head(OJ)
+```
+
+## a.
+
+```{r}
+# set seed for reproducable results
+set.seed(1)
+
+# spliting data into training and test sets
+Z <- sample(1:nrow(OJ), 800)
+train <- OJ[Z, ]
+test <- OJ[-Z, ]
+```
+
+## b.
+
+```{r}
+# adding required library
+library(tree)
+
+# fitting tree model and then viewing results
+tree.fit <- tree(Purchase ~ ., data = train)
+summary(tree.fit)
+```
+This particular tree 9 terminal nodes with a training error rate of 0.1588.  Our residual mean deviance suggests that there is quite a bit of error in fitted tree.
+
+
+## c.
+
+```{r}
+tree.fit
+```
+
+We'll use number 9 as our example for this question.  This is a terminal node, as denoted by the asterisk, with a split criterion of `LoyalCH` > 0.036.  This terminal node has 118 observations, has a deviance of 116.4, and selects Minute Maid as it's final selection.  About 19% of the observations take on the value of Citrus Hill while the remaining 81% take on the value of Minute Maid.
+
+## d.
+
+```{r}
+plot(tree.fit)
+text(tree.fit, pretty = 0)
+```
+
+Based on the above chart, it appears that `LoyalCH` is a very important indicator of `Purchase.`  We see that when `LoyalCH` is below 0.5036, we only have to outcomes when `Purchase` is decided as Citrus Hill, and that's only when `LoyalCH` is still above a certain threshold (0.28).  The right hand side shows only one possible outcome for Minute Maid, which can only be achieved when Minute Maid has a discount at least above 19.6%.
+
+### e.
+
+```{r}
+# creating predictions
+tree.preds <- predict(tree.fit, test, type = "class")
+
+# creating confusion matrix
+table(tree.preds, test$Purchase)
+```
+
+```{r}
+# calculating test error rate
+1 - mean(tree.preds == test$Purchase)
+```
+
+The test error rate is about 17%.  
+
+## f.
+
+```{r}
+# doing cv on model that was set on training set
+cv.tree.fit <- cv.tree(tree.fit, FUN = prune.misclass)
+cv.tree.fit
+```
+
+## g.
+
+```{r}
+# creating cv tree error plot
+plot(cv.tree.fit$size, cv.tree.fit$dev, type = "b", 
+     xlab = "Tree size", ylab = "Deviance")
+```
+
+## h.
+
+If we minimize the deviance, then we should use a tree with 7 terminal nodes as opposed to the tree with 9 terminal nodes from before.
+
+## i.
+
+```{r}
+# creating pruned tree object
+prune.tree.fit <- prune.misclass(tree.fit, best = 7)
+
+# creating pruned tree plot
+plot(prune.tree.fit)
+text(prune.tree.fit, pretty = 0)
+```
+
+## j.
+
+```{r}
+# inspecting non-pruned tree
+summary(tree.fit)
+```
+```{r}
+# inspecting pruned tree
+summary(prune.tree.fit)
+```
+The pruned tree has a slightly higher error rate (0.1625), compared to the non-pruned tree's error rate (0.1588).
+
+## k.
+
+```{r}
+# creating predictions for pruned tree
+prune.tree.preds <- predict(prune.tree.fit, test, type = "class")
+
+# creating confusion matrix
+table(prune.tree.preds, test$Purchase)
+```
+
+```{r}
+# calculating test error rate
+1 - mean(prune.tree.preds == test$Purchase)
+```
+
+The pruned tree had a slightly lower test error rate compared to the non-pruned tree.  The pruned tree had around a 16% test error rate, compared to the non-pruned tree's test error rate of around 17%.  The pruned tree performed slightly better and is more interpretable than the non-pruned tree.
+
+
+
+
+
+
+
+
