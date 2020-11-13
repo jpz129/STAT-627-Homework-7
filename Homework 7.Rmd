@@ -9,6 +9,27 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# 1.
+
+## a.
+
+![Predictor Space.](20201113_180147.jpg)
+
+## b.
+
+![Decision Tree.](20201113_180206.jpg)
+
+# 2.
+
+```{r}
+values <- c(0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7, 0.75)
+
+table(values > 0.5)
+
+mean(values)
+```
+If we use the majority rule, then our observation X will belong to the red class.  If we use the average probability, then X will not belong to the red class since the mean probability is 0.45.
+
 # 3.
 
 ```{r}
